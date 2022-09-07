@@ -48,7 +48,7 @@ struct DEV_TemperatureSensor : Service::TemperatureSensor { // A standalone Air 
 
 	DEV_TemperatureSensor() : Service::TemperatureSensor() { // constructor() method
 
-		temp = new Characteristic::CurrentTemperature(-10.0);
+		temp = new Characteristic::CurrentTemperature(0, true);
 		temp->setRange(-50, 100);
 
 		offsetTemp.setUnit("Deg."); // configures custom "Selector" characteristic for use with Eve HomeKit
@@ -61,30 +61,30 @@ struct DEV_TemperatureSensor : Service::TemperatureSensor { // A standalone Air 
 
 	void loop() {
 
-		if (temp->timeVal() > INTERVAL * 1000) { // modify the Temperature Characteristic every 10 seconds
+		// if (temp->timeVal() > INTERVAL * 1000) { // modify the Temperature Characteristic every 10 seconds
 
-			unsigned int data[2];
+		// unsigned int data[2];
 
-			// Convert the data
-			float temperature = 20;
-			// temperature		  = ((175.72 * temperature) / 65536.0) - 46.85;
-			mySensor_temp.add(temperature);
-			float offset = offsetTemp.getVal<float>();
+		// // Convert the data
+		// float temperature = 20;
+		// // temperature		  = ((175.72 * temperature) / 65536.0) - 46.85;
+		// mySensor_temp.add(temperature);
+		// float offset = offsetTemp.getVal<float>();
 
-			LOG1("Current temperature: ");
-			LOG1(mySensor_temp.get());
-			LOG1("\n");
+		// LOG1("Current temperature: ");
+		// LOG1(mySensor_temp.get());
+		// LOG1("\n");
 
-			LOG1("Offset: ");
-			LOG1(offset);
-			LOG1("\n");
+		// LOG1("Offset: ");
+		// LOG1(offset);
+		// LOG1("\n");
 
-			LOG1("Current corrected temperature: ");
-			LOG1(mySensor_temp.get() + offset);
-			LOG1("\n");
+		// LOG1("Current corrected temperature: ");
+		// LOG1(mySensor_temp.get() + offset);
+		// LOG1("\n");
 
-			temp->setVal(mySensor_temp.get() + offset);
-		}
+		// temp->setVal(mySensor_temp.get() + offset);
+		// }
 
 	} // loop
 };
@@ -96,7 +96,7 @@ struct DEV_HumiditySensor : Service::HumiditySensor { // A standalone Air Qualit
 
 	DEV_HumiditySensor() : Service::HumiditySensor() { // constructor() method
 
-		hum = new Characteristic::CurrentRelativeHumidity();
+		hum = new Characteristic::CurrentRelativeHumidity(0, true);
 
 		Serial.print("Configuring Humidity Sensor"); // initialization message
 		Serial.print("\n");
@@ -111,30 +111,30 @@ struct DEV_HumiditySensor : Service::HumiditySensor { // A standalone Air Qualit
 
 	void loop() {
 
-		if (hum->timeVal() > INTERVAL * 1000) { // modify the Temperature Characteristic every 10 seconds
+		// if (hum->timeVal() > INTERVAL * 1000) { // modify the Temperature Characteristic every 10 seconds
 
-			unsigned int data[2];
+		// unsigned int data[2];
 
-			// Convert the data
-			float humidity = 30;
-			// humidity	   = ((125 * humidity) / 65536.0) - 6;
-			mySensor_hum.add(humidity);
-			float offset = offsetHum.getVal<float>();
+		// // Convert the data
+		// float humidity = 30;
+		// // humidity	   = ((125 * humidity) / 65536.0) - 6;
+		// mySensor_hum.add(humidity);
+		// float offset = offsetHum.getVal<float>();
 
-			LOG1("Current humidity: ");
-			LOG1(mySensor_hum.get());
-			LOG1("\n");
+		// LOG1("Current humidity: ");
+		// LOG1(mySensor_hum.get());
+		// LOG1("\n");
 
-			LOG1("Offset: ");
-			LOG1(offset);
-			LOG1("\n");
+		// LOG1("Offset: ");
+		// LOG1(offset);
+		// LOG1("\n");
 
-			LOG1("Current corrected humidity: ");
-			LOG1(mySensor_hum.get() + offset);
-			LOG1("\n");
+		// LOG1("Current corrected humidity: ");
+		// LOG1(mySensor_hum.get() + offset);
+		// LOG1("\n");
 
-			hum->setVal(mySensor_hum.get() + offset);
-		}
+		// hum->setVal(mySensor_hum.get() + offset);
+	}
 
-	} // loop
+	// } // loop
 };

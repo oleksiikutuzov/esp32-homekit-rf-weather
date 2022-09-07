@@ -49,7 +49,7 @@
  *                ╚═════════════════════════════╝
  */
 
-#define REQUIRED VERSION(1, 6, 0)
+#define REQUIRED VERSION(1, 4, 2)
 
 #include "DEV_Sensors.hpp"
 #include <WiFiClient.h>
@@ -62,21 +62,85 @@
 #include <ArduinoJson.h>
 #include <ArduinoLog.h>
 
+// *** Defines for RF receiver ***
+#ifndef RF_MODULE_FREQUENCY
+#define RF_MODULE_FREQUENCY 433.92
+#endif
+
+#define JSON_MSG_BUFFER 512
+
+int receivedPackets = 0;
+
+void logJson(JsonObject &jsondata);
+
+char messageBuffer[JSON_MSG_BUFFER];
+
+rtl_433_ESP rf(-1); // use -1 to disable transmitter
+// ***
+
 #define BUTTON_PIN	   0
 #define LED_STATUS_PIN 26
 
 WebServer server(80);
-
-extern "C++" bool needToWarmUp;
 
 void setupWeb();
 
 DEV_TemperatureSensor *TEMP;
 DEV_HumiditySensor	  *HUM;
 
+void rtl_433_Callback(char *message) {
+	DynamicJsonBuffer jsonBuffer2(JSON_MSG_BUFFER);
+	JsonObject		 &RFrtl_433_ESPdata = jsonBuffer2.parseObject(message);
+	logJson(RFrtl_433_ESPdata);
+
+	const char *model	   = RFrtl_433_ESPdata["model"];
+	int			id		   = RFrtl_433_ESPdata["id"];
+	int			channel	   = RFrtl_433_ESPdata["channel"];
+	bool		battery_ok = RFrtl_433_ESPdata["battery_ok"];
+	String		battery	   = (battery_ok == 1) ? "Ok" : "Low";
+	float		temp	   = RFrtl_433_ESPdata["temperature_C"];
+	float		hum		   = RFrtl_433_ESPdata["humidity"];
+
+	Serial.println("Model: " + (String)model);
+	Serial.println("ID: " + (String)id);
+	Serial.println("Channel: " + (String)channel);
+	Serial.println("Battery: " + battery);
+	Serial.println("Temperature: " + (String)temp);
+	Serial.println("Humidity: " + (String)hum);
+
+	receivedPackets++;
+
+	if (hum != 0 && temp != 0) {
+		HUM->hum->setVal(hum);
+		TEMP->temp->setVal(temp);
+	}
+}
+
+void logJson(JsonObject &jsondata) {
+#if defined(ESP8266) || defined(ESP32) || defined(__AVR_ATmega2560__) || \
+	defined(__AVR_ATmega1280__)
+	char JSONmessageBuffer[jsondata.measureLength() + 1];
+#else
+	char JSONmessageBuffer[JSON_MSG_BUFFER];
+#endif
+	jsondata.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
+	Log.notice(F("Received message : %s" CR), JSONmessageBuffer);
+}
+
 void setup() {
 
 	Serial.begin(115200);
+
+	delay(1000);
+
+	Log.begin(LOG_LEVEL, &Serial);
+	Log.notice(F(" " CR));
+	Log.notice(F("****** setup ******" CR));
+	rf.initReceiver(RF_MODULE_RECEIVER_GPIO, RF_MODULE_FREQUENCY);
+	rf.setCallback(rtl_433_Callback, messageBuffer, JSON_MSG_BUFFER);
+	//  ELECHOUSE_cc1101.SetRx(CC1101_FREQUENCY); // set Receive on
+	rf.enableReceiver(RF_MODULE_RECEIVER_GPIO);
+	Log.notice(F("****** setup complete ******" CR));
 
 	Serial.print("Active firmware version: ");
 	Serial.println(FirmwareVer);
@@ -124,42 +188,35 @@ void loop() {
 	homeSpan.poll();
 	server.handleClient();
 	// repeatedCall();
+	rf.loop();
 }
 
 void setupWeb() {
 	LOG0("Starting Air Quality Sensor Server Hub...\n\n");
 
 	server.on("/metrics", HTTP_GET, []() {
-		float  temp	  = TEMP->temp->getVal<float>();
-		float  hum	  = HUM->hum->getVal<float>();
-		float  uptime = esp_timer_get_time() / (6 * 10e6);
-		float  heap	  = esp_get_free_heap_size();
-		String uptimeMetric =
-			"# HELP uptime Sensor "
-			"uptime\nhomekit_uptime{device=\"air_sensor\",location=\"home\"} " +
-			String(int(uptime));
-		String heapMetric =
-			"# HELP heap Available heap "
-			"memory\nhomekit_heap{device=\"air_sensor\",location=\"home\"} " +
-			String(int(heap));
-
-		String tempMetric = "# HELP temp "
-							"Temperature\nhomekit_temperature{device=\"air_"
-							"sensor\",location=\"home\"} " +
-							String(temp);
-		String humMetric =
-			"# HELP hum Relative "
-			"Humidity\nhomekit_humidity{device=\"air_sensor\",location=\"home\"} " +
-			String(hum);
-
+		float  temp			  = TEMP->temp->getVal<float>();
+		float  hum			  = HUM->hum->getVal<float>();
+		float  uptime		  = esp_timer_get_time() / (6 * 10e6);
+		float  heap			  = esp_get_free_heap_size();
+		String uptimeMetric	  = "# HELP uptime Sensor uptime\nhomekit_uptime{device=\"air_sensor\",location=\"home\"} " + String(int(uptime));
+		String heapMetric	  = "# HELP heap Available heap memory\nhomekit_heap{device=\"air_sensor\",location=\"home\"} " + String(int(heap));
+		String tempMetric	  = "# HELP temp Temperature\nhomekit_temperature{device=\"air_sensor\",location=\"home\"} " + String(temp);
+		String humMetric	  = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"air_sensor\",location=\"home\"} " + String(hum);
+		String receivedMetric = "# HELP received Number of received samples\nhomekit_received{device=\"air_sensor\",location=\"home\"} " + String(receivedPackets);
+		LOG1("\n");
 		LOG1(uptimeMetric);
+		LOG1("\n");
 		LOG1(heapMetric);
-
+		LOG1("\n");
 		LOG1(tempMetric);
+		LOG1("\n");
 		LOG1(humMetric);
+		LOG1("\n");
+		LOG1(receivedMetric);
+		LOG1("\n");
 
-		server.send(200, "text/plain",
-					uptimeMetric + "\n" + heapMetric + "\n" + tempMetric + "\n" + humMetric);
+		server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric + "\n" + humMetric + "\n" + receivedMetric);
 	});
 
 	server.on("/reboot", HTTP_GET, []() {

@@ -15,8 +15,11 @@
 		"DRSSI",
 		"DRTL",
 		"DSIGNAL",
+		"ELECHOUSE",
 		"fwurl",
 		"jgromes",
+		"jsondata",
+		"lolin",
 		"mattfryer",
 		"Millis",
 		"NEOPIXEL",
@@ -25,6 +28,8 @@
 		"plerup",
 		"RSSI",
 		"UART",
+		"unflags",
+		"Werror",
 		"wsdth"
 	]
 }
