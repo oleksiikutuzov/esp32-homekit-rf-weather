@@ -215,14 +215,14 @@ void setup() {
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
 	new Characteristic::Name("Temperature Sensor");
-	new Characteristic::Model("TFA 30.3221.02");
+	new Characteristic::Model("Infactory NC-3982-675");
 	TEMP_2 = new DEV_TemperatureSensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
 	new Characteristic::Name("Humidity Sensor");
-	new Characteristic::Model("Infactory NC-3982-675");
+	new Characteristic::Model("TFA 30.3221.02");
 	HUM_1 = new DEV_HumiditySensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
 
 	new SpanAccessory();
