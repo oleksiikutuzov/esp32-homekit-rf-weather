@@ -1,20 +1,18 @@
 name: Build and export binaries
 
 on:
-  push:
-    branches:
-      - main
+ push:
+  branches:
+    - main
 
 jobs:
-  build_1ch:
+  build:
 
-    name: Build 1 CH
+    name: Build All
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: recursive
     - name: Cache pip
       uses: actions/cache@v2
       with:
@@ -34,76 +32,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio run -e esp32_1ch
-    - uses: actions/upload-artifact@v3
+      run: pio run -e esp32_1ch -e esp32_2ch -e esp32_3ch
+    - name: Commit Binaries
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        name: my-artifact
-        path: path/bin/esp32_*.bin
-
-  build_2ch:
-
-    name: Build 2 CH
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Cache PlatformIO
-      uses: actions/cache@v2
-      with:
-        path: ~/.platformio
-        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Install PlatformIO
-      run: |
-        python -m pip install --upgrade pip
-        pip install --upgrade platformio
-    - name: Run PlatformIO
-      run: pio run -e esp32_2ch
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-artifact
-        path: path/bin/esp32_*.bin
-
-  build_3ch:
-
-    name: Build 3 CH
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Cache PlatformIO
-      uses: actions/cache@v2
-      with:
-        path: ~/.platformio
-        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Install PlatformIO
-      run: |
-        python -m pip install --upgrade pip
-        pip install --upgrade platformio
-    - name: Run PlatformIO
-      run: pio run -e esp32_3ch
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-artifact
-        path: path/bin/esp32_*.bin
+        commit_message: Automated Binary Upload
+        commit_options: '--no-verify --signoff'
+        status_options: '--untracked-files=no'
+        file_pattern: bin/esp32_*.bin
