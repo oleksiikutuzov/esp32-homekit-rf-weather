@@ -50,9 +50,12 @@
  */
 
 // TODO battery status
-// TODO remove offset
 
-#define REQUIRED VERSION(1, 4, 2)
+#define REQUIRED VERSION(1, 6, 0)
+
+#ifndef NUM_CHANNELS
+#define NUM_CHANNELS 3 // set number of channels here (1...3)
+#endif
 
 #include "DEV_Sensors.hpp"
 #include <WiFiClient.h>
@@ -72,9 +75,6 @@
 
 #define JSON_MSG_BUFFER 512
 
-int receivedPackets_1 = 0;
-int receivedPackets_2 = 0;
-
 void logJson(JsonObject &jsondata);
 
 char messageBuffer[JSON_MSG_BUFFER];
@@ -87,35 +87,49 @@ rtl_433_ESP rf(-1); // use -1 to disable transmitter
 
 WebServer server(80);
 
+char sNumber[18] = "11:11:11:11:11:11";
+
 void setupWeb();
 
 DEV_TemperatureSensor *TEMP_1;
 DEV_HumiditySensor	  *HUM_1;
+int					   receivedPackets_1 = 0;
 
+#if NUM_CHANNELS >= 2
 DEV_TemperatureSensor *TEMP_2;
 DEV_HumiditySensor	  *HUM_2;
+int					   receivedPackets_2 = 0;
+#endif
+
+#if NUM_CHANNELS == 3
+DEV_TemperatureSensor *TEMP_3;
+DEV_HumiditySensor	  *HUM_3;
+int					   receivedPackets_3 = 0;
+#endif
 
 void rtl_433_Callback(char *message) {
 	DynamicJsonBuffer jsonBuffer2(JSON_MSG_BUFFER);
 	JsonObject		 &RFrtl_433_ESPdata = jsonBuffer2.parseObject(message);
 	logJson(RFrtl_433_ESPdata);
 
-	if (RFrtl_433_ESPdata["model"] == "LaCrosse-TX141THBv2") {
+	const char *model	   = RFrtl_433_ESPdata["model"];
+	int			id		   = RFrtl_433_ESPdata["id"];
+	int			channel	   = RFrtl_433_ESPdata["channel"];
+	bool		battery_ok = RFrtl_433_ESPdata["battery_ok"];
+	String		battery	   = (battery_ok == 1) ? "Ok" : "Low";
+	float		temp	   = RFrtl_433_ESPdata["temperature_C"];
+	float		hum		   = RFrtl_433_ESPdata["humidity"];
 
-		const char *model	   = RFrtl_433_ESPdata["model"];
-		int			id		   = RFrtl_433_ESPdata["id"];
-		int			channel	   = RFrtl_433_ESPdata["channel"];
-		bool		battery_ok = RFrtl_433_ESPdata["battery_ok"];
-		String		battery	   = (battery_ok == 1) ? "Ok" : "Low";
-		float		temp	   = RFrtl_433_ESPdata["temperature_C"];
-		float		hum		   = RFrtl_433_ESPdata["humidity"];
+	Serial.println("Model: " + (String)model);
+	Serial.println("ID: " + (String)id);
+	Serial.println("Channel: " + (String)channel);
+	Serial.println("Battery: " + battery);
+	Serial.println("Temperature: " + (String)temp);
+	Serial.println("Humidity: " + (String)hum);
 
-		Serial.println("Model: " + (String)model);
-		Serial.println("ID: " + (String)id);
-		Serial.println("Channel: " + (String)channel);
-		Serial.println("Battery: " + battery);
-		Serial.println("Temperature: " + (String)temp);
-		Serial.println("Humidity: " + (String)hum);
+	if (RFrtl_433_ESPdata["channel"] == 1) {
+
+		Serial.println("Received on channel 1");
 
 		receivedPackets_1++;
 
@@ -123,22 +137,12 @@ void rtl_433_Callback(char *message) {
 			HUM_1->hum->setVal(hum);
 			TEMP_1->temp->setVal(temp);
 		}
+	}
 
-	} else if (RFrtl_433_ESPdata["model"] == "inFactory-TH") {
-		const char *model	   = RFrtl_433_ESPdata["model"];
-		int			id		   = RFrtl_433_ESPdata["id"];
-		int			channel	   = RFrtl_433_ESPdata["channel"];
-		bool		battery_ok = RFrtl_433_ESPdata["battery_ok"];
-		String		battery	   = (battery_ok == 1) ? "Ok" : "Low";
-		float		temp	   = RFrtl_433_ESPdata["temperature_C"];
-		float		hum		   = RFrtl_433_ESPdata["humidity"];
+#if NUM_CHANNELS >= 2
+	if (RFrtl_433_ESPdata["channel"] == 2) {
 
-		Serial.println("Model: " + (String)model);
-		Serial.println("ID: " + (String)id);
-		Serial.println("Channel: " + (String)channel);
-		Serial.println("Battery: " + battery);
-		Serial.println("Temperature: " + (String)temp);
-		Serial.println("Humidity: " + (String)hum);
+		Serial.println("Received on channel 2");
 
 		receivedPackets_2++;
 
@@ -147,6 +151,21 @@ void rtl_433_Callback(char *message) {
 			TEMP_2->temp->setVal(temp);
 		}
 	}
+#endif
+
+#if NUM_CHANNELS == 3
+	if (RFrtl_433_ESPdata["channel"] == 3) {
+
+		Serial.println("Received on channel 3");
+
+		receivedPackets_3++;
+
+		if (hum != 0 && temp != 0) {
+			HUM_3->hum->setVal(hum);
+			TEMP_3->temp->setVal(temp);
+		}
+	}
+#endif
 }
 
 void logJson(JsonObject &jsondata) {
@@ -208,35 +227,53 @@ void setup() {
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
 	new Characteristic::Name("Temperature Sensor");
-	new Characteristic::Model("TFA 30.3221.02");
+	new Characteristic::Model("Channel 1");
 	TEMP_1 = new DEV_TemperatureSensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
+	new Characteristic::Name("Humidity Sensor");
+	new Characteristic::Model("Channel 1");
+	HUM_1 = new DEV_HumiditySensor();
+
+#if NUM_CHANNELS >= 2
+	new SpanAccessory();
+	new Service::AccessoryInformation();
+	new Characteristic::Identify();
 	new Characteristic::Name("Temperature Sensor");
-	new Characteristic::Model("Infactory NC-3982-675");
-	TEMP_2 = new DEV_TemperatureSensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
+	new Characteristic::Model("Channel 2");
+	TEMP_2 = new DEV_TemperatureSensor();
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
 	new Characteristic::Name("Humidity Sensor");
-	new Characteristic::Model("TFA 30.3221.02");
-	HUM_1 = new DEV_HumiditySensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
+	new Characteristic::Model("Channel 2");
+	HUM_2 = new DEV_HumiditySensor();
+#endif
+
+#if NUM_CHANNELS == 3
+	new SpanAccessory();
+	new Service::AccessoryInformation();
+	new Characteristic::Identify();
+	new Characteristic::Name("Temperature Sensor");
+	new Characteristic::Model("Channel 3");
+	TEMP_3 = new DEV_TemperatureSensor();
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
 	new Characteristic::Name("Humidity Sensor");
-	new Characteristic::Model("Infactory NC-3982-675");
-	HUM_2 = new DEV_HumiditySensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
+	new Characteristic::Model("Channel 3");
+	HUM_3 = new DEV_HumiditySensor();
+#endif
 }
 
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	// repeatedCall();
+	repeatedCall();
 	rf.loop();
 }
 
@@ -244,20 +281,26 @@ void setupWeb() {
 	LOG0("Starting Air Quality Sensor Server Hub...\n\n");
 
 	server.on("/metrics", HTTP_GET, []() {
-		float  temp_1			= TEMP_1->temp->getVal<float>();
-		float  hum_1			= HUM_1->hum->getVal<float>();
-		float  temp_2			= TEMP_2->temp->getVal<float>();
-		float  hum_2			= HUM_2->hum->getVal<float>();
-		float  uptime			= esp_timer_get_time() / (6 * 10e6);
-		float  heap				= esp_get_free_heap_size();
-		String uptimeMetric		= "# HELP uptime Sensor uptime\nhomekit_uptime{device=\"rf_bridge\",location=\"home\"} " + String(int(uptime));
-		String heapMetric		= "# HELP heap Available heap memory\nhomekit_heap{device=\"rf_bridge\",location=\"home\"} " + String(int(heap));
-		String tempMetric_1		= "# HELP temp Temperature\nhomekit_temperature{device=\"tfa\",location=\"home\"} " + String(temp_1);
-		String humMetric_1		= "# HELP hum Relative Humidity\nhomekit_humidity{device=\"tfa\",location=\"home\"} " + String(hum_1);
-		String receivedMetric_1 = "# HELP received Number of received samples\nhomekit_received{device=\"tfa\",location=\"home\"} " + String(receivedPackets_1);
-		String tempMetric_2		= "# HELP temp Temperature\nhomekit_temperature{device=\"infactory\",location=\"home\"} " + String(temp_2);
-		String humMetric_2		= "# HELP hum Relative Humidity\nhomekit_humidity{device=\"infactory\",location=\"home\"} " + String(hum_2);
-		String receivedMetric_2 = "# HELP received Number of received samples\nhomekit_received{device=\"infactory\",location=\"home\"} " + String(receivedPackets_2);
+		float temp_1 = TEMP_1->temp->getVal<float>();
+		float hum_1	 = HUM_1->hum->getVal<float>();
+
+#if NUM_CHANNELS >= 2
+		float temp_2 = TEMP_2->temp->getVal<float>();
+		float hum_2	 = HUM_2->hum->getVal<float>();
+#endif
+
+#if NUM_CHANNELS == 3
+		float temp_3 = TEMP_3->temp->getVal<float>();
+		float hum_3	 = HUM_3->hum->getVal<float>();
+#endif
+		float  uptime		= esp_timer_get_time() / (6 * 10e6);
+		float  heap			= esp_get_free_heap_size();
+		String uptimeMetric = "# HELP uptime Sensor uptime\nhomekit_uptime{device=\"rf_bridge\",location=\"home\"} " + String(int(uptime));
+		String heapMetric	= "# HELP heap Available heap memory\nhomekit_heap{device=\"rf_bridge\",location=\"home\"} " + String(int(heap));
+
+		String tempMetric_1		= "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"1\",location=\"home\"} " + String(temp_1);
+		String humMetric_1		= "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"1\",location=\"home\"} " + String(hum_1);
+		String receivedMetric_1 = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"1\",location=\"home\"} " + String(receivedPackets_1);
 
 		LOG1("\n");
 		LOG1(uptimeMetric);
@@ -270,14 +313,40 @@ void setupWeb() {
 		LOG1("\n");
 		LOG1(receivedMetric_1);
 		LOG1("\n");
+
+#if NUM_CHANNELS >= 2
+		String tempMetric_2		= "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(temp_2);
+		String humMetric_2		= "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(hum_2);
+		String receivedMetric_2 = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(receivedPackets_2);
+
 		LOG1(tempMetric_2);
 		LOG1("\n");
 		LOG1(humMetric_2);
 		LOG1("\n");
 		LOG1(receivedMetric_2);
 		LOG1("\n");
+#endif
 
-		server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2);
+#if NUM_CHANNELS == 3
+		String tempMetric_3		= "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(temp_2);
+		String humMetric_3		= "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(hum_2);
+		String receivedMetric_3 = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(receivedPackets_2);
+
+		LOG1(tempMetric_3);
+		LOG1("\n");
+		LOG1(humMetric_3);
+		LOG1("\n");
+		LOG1(receivedMetric_3);
+		LOG1("\n");
+#endif
+
+#if NUM_CHANNELS == 1
+		server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1);
+#elif NUM_CHANNELS == 2
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2);
+#elif NUM_CHANNELS == 3
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2 + "\n" + tempMetric_3 + "\n" + humMetric_3 + "\n" + receivedMetric_3);
+#endif
 	});
 
 	server.on("/reboot", HTTP_GET, []() {

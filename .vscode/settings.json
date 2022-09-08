@@ -1,5 +1,6 @@
 {
 	"cSpell.words": [
+		"adafruit",
 		"arduinoespressif",
 		"arduinojson",
 		"arduinolog",
@@ -9,6 +10,7 @@
 		"DLOG",
 		"DMEMORY",
 		"DMINRSSI",
+		"DNUM",
 		"DONBOARD",
 		"DPUBLISH",
 		"DRADIOLIB",
@@ -20,16 +22,21 @@
 		"Infactory",
 		"jgromes",
 		"jsondata",
+		"lockfiles",
 		"lolin",
 		"mattfryer",
 		"Millis",
 		"NEOPIXEL",
 		"nhomekit",
+		"OLED",
 		"platformio",
 		"plerup",
 		"RSSI",
+		"SWITCHCAPVCC",
+		"thingpulse",
 		"UART",
 		"unflags",
+		"Wdiscarded",
 		"Werror",
 		"wsdth"
 	]

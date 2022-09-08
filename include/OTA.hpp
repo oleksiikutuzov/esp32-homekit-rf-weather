@@ -5,14 +5,17 @@
 #include "cert.hpp"
 #include <HomeSpan.h>
 
-#define URL_fw_Version "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-air-quality/V4.0/bin_version.txt"
+#define URL_fw_Version "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin_version.txt"
 
-#if HARDWARE_VER == 4
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-air-quality/V4.0/esp32_air_quality_v4.bin"
-#else
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-air-quality/V4.0/esp32_air_quality_v3.bin"
+#if NUM_CHANNELS == 1
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_1ch.bin"
+#elif NUM_CHANNELS == 2
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_2ch.bin"
+#elif NUM_CHANNELS == 3
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_3ch.bin"
 #endif
-#define FW_VERSION "1.4.3"
+
+#define FW_VERSION "1.0.0"
 
 String FirmwareVer = {
 	FW_VERSION};
