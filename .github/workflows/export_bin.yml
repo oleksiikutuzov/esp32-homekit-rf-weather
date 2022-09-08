@@ -40,4 +40,3 @@ jobs:
         commit_options: '--no-verify --signoff'
         status_options: '--untracked-files=no'
         file_pattern: bin/esp32_*.bin
-        push_options: --force
