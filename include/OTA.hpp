@@ -8,14 +8,14 @@
 #define URL_fw_Version "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin_version.txt"
 
 #if NUM_CHANNELS == 1
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_1ch.bin"
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_1ch.bin"
 #elif NUM_CHANNELS == 2
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_2ch.bin"
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_2ch.bin"
 #elif NUM_CHANNELS == 3
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_bridge_3ch.bin"
+#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_3ch.bin"
 #endif
 
-#define FW_VERSION "1.0.0"
+#define FW_VERSION "1.0.1"
 
 String FirmwareVer = {
 	FW_VERSION};
