@@ -15,7 +15,7 @@
 #define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_3ch.bin"
 #endif
 
-#define FW_VERSION "1.0.1"
+#define FW_VERSION "1.0.3"
 
 String FirmwareVer = {
 	FW_VERSION};
