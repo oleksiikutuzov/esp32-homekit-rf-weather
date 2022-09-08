@@ -34,7 +34,7 @@ jobs:
     - name: Run PlatformIO
       run: pio run -e esp32_1ch -e esp32_2ch -e esp32_3ch
     - name: Commit Binaries
-    - uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Automated Binary Upload
         commit_options: '--no-verify --signoff'
