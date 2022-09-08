@@ -1,6 +1,9 @@
 name: PlatformIO Build
 
-on: [push]
+on:
+  push:
+    branches:
+      - dev
 
 jobs:
   build_1ch:
