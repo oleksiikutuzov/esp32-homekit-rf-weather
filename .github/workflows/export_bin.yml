@@ -13,8 +13,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        token: ${{ secrets.PAT }}
     - name: Cache pip
       uses: actions/cache@v2
       with:
@@ -41,3 +39,4 @@ jobs:
         commit_options: '--no-verify --signoff'
         status_options: '--untracked-files=no'
         file_pattern: bin/esp32_*.bin
+        push_options: --force
