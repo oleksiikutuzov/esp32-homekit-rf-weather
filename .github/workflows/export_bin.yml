@@ -35,10 +35,12 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: pio run -e esp32_1ch
-    - uses: actions/upload-artifact@v3
+    - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        name: my-artifact
-        path: bin/esp32_*.bin
+        commit_message: Automated Binary Upload
+        commit_options: '--no-verify --signoff'
+        status_options: '--untracked-files=no'
+        file_pattern: bin/esp32_*.bin
 
   build_2ch:
 
@@ -69,10 +71,12 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: pio run -e esp32_2ch
-    - uses: actions/upload-artifact@v3
+    - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        name: my-artifact
-        path: bin/esp32_*.bin
+        commit_message: Automated Binary Upload
+        commit_options: '--no-verify --signoff'
+        status_options: '--untracked-files=no'
+        file_pattern: bin/esp32_*.bin
 
   build_3ch:
 
@@ -103,7 +107,9 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: pio run -e esp32_3ch
-    - uses: actions/upload-artifact@v3
+    - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        name: my-artifact
-        path: bin/esp32_*.bin
+        commit_message: Automated Binary Upload
+        commit_options: '--no-verify --signoff'
+        status_options: '--untracked-files=no'
+        file_pattern: bin/esp32_*.bin
