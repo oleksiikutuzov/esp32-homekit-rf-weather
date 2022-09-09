@@ -18,7 +18,7 @@ struct DEV_TemperatureSensor : Service::TemperatureSensor { // A standalone Air 
 
 struct DEV_HumiditySensor : Service::HumiditySensor { // A standalone Air Quality sensor
 
-	SpanCharacteristic *hum; // reference to the Temperature Characteristic
+	SpanCharacteristic *hum;
 
 	DEV_HumiditySensor() : Service::HumiditySensor() { // constructor() method
 
