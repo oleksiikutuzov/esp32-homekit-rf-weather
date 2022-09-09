@@ -13,4 +13,3 @@ jobs:
         source: 'src include'
         extensions: 'hpp,cpp'
         clangFormatVersion: 14
-        style: LLVM
