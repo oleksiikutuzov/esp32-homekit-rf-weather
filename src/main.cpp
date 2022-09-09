@@ -50,6 +50,7 @@
  */
 
 // TODO battery status
+// TODO normalize channel number
 
 #define REQUIRED VERSION(1, 6, 0)
 
@@ -120,6 +121,11 @@ void rtl_433_Callback(char *message) {
 	float       temp       = RFrtl_433_ESPdata["temperature_C"];
 	float       hum        = RFrtl_433_ESPdata["humidity"];
 
+	// in this sensor channels are encoded as 0...2
+	if (RFrtl_433_ESPdata["model"] == "LaCrosse-TX141THBv2") {
+		channel++;
+	}
+
 	Serial.println("Model: " + (String)model);
 	Serial.println("ID: " + (String)id);
 	Serial.println("Channel: " + (String)channel);
@@ -127,7 +133,7 @@ void rtl_433_Callback(char *message) {
 	Serial.println("Temperature: " + (String)temp);
 	Serial.println("Humidity: " + (String)hum);
 
-	if (RFrtl_433_ESPdata["channel"] == 1) {
+	if (channel == 1) {
 
 		Serial.println("Received on channel 1");
 
@@ -140,7 +146,7 @@ void rtl_433_Callback(char *message) {
 	}
 
 #if NUM_CHANNELS >= 2
-	if (RFrtl_433_ESPdata["channel"] == 2) {
+	if (channel == 2) {
 
 		Serial.println("Received on channel 2");
 
@@ -154,7 +160,7 @@ void rtl_433_Callback(char *message) {
 #endif
 
 #if NUM_CHANNELS == 3
-	if (RFrtl_433_ESPdata["channel"] == 3) {
+	if (channel == 3) {
 
 		Serial.println("Received on channel 3");
 
