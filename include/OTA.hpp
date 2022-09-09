@@ -1,33 +1,33 @@
-#include <WiFi.h>
+#include "cert.hpp"
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
-#include <WiFiClientSecure.h>
-#include "cert.hpp"
 #include <HomeSpan.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
 
 #define URL_fw_Version "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin_version.txt"
 
 #if NUM_CHANNELS == 1
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_1ch.bin"
+	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_1ch.bin"
 #elif NUM_CHANNELS == 2
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_2ch.bin"
+	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_2ch.bin"
 #elif NUM_CHANNELS == 3
-#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_3ch.bin"
+	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-bridge/main/bin/esp32_rf_weather_3ch.bin"
 #endif
 
 #define FW_VERSION "1.0.3"
 
 String FirmwareVer = {
-	FW_VERSION};
+    FW_VERSION};
 
 void firmwareUpdate();
-int	 FirmwareVersionCheck();
+int  FirmwareVersionCheck();
 
-unsigned long previousMillis = 0;			   // will store last time LED was updated
-const long	  interval		 = 60 * 60 * 1000; // 1 hour in ms
+unsigned long previousMillis = 0;              // will store last time LED was updated
+const long    interval       = 60 * 60 * 1000; // 1 hour in ms
 
 void repeatedCall() {
-	static int	  num			= 0;
+	static int    num           = 0;
 	unsigned long currentMillis = millis();
 
 	if ((currentMillis - previousMillis) >= interval) {
@@ -45,23 +45,23 @@ void firmwareUpdate(void) {
 	t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
 
 	switch (ret) {
-	case HTTP_UPDATE_FAILED:
-		LOG1("HTTP_UPDATE_FAILED Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
-		break;
+		case HTTP_UPDATE_FAILED:
+			LOG1("HTTP_UPDATE_FAILED Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+			break;
 
-	case HTTP_UPDATE_NO_UPDATES:
-		LOG1("HTTP_UPDATE_NO_UPDATES");
-		break;
+		case HTTP_UPDATE_NO_UPDATES:
+			LOG1("HTTP_UPDATE_NO_UPDATES");
+			break;
 
-	case HTTP_UPDATE_OK:
-		LOG1("HTTP_UPDATE_OK");
-		break;
+		case HTTP_UPDATE_OK:
+			LOG1("HTTP_UPDATE_OK");
+			break;
 	}
 }
 
 int FirmwareVersionCheck(void) {
 	String payload;
-	int	   httpCode;
+	int    httpCode;
 	String fwurl = "";
 	fwurl += URL_fw_Version;
 	fwurl += "?";
