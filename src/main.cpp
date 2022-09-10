@@ -49,8 +49,7 @@
  *                ╚═════════════════════════════╝
  */
 
-// TODO battery status
-// TODO normalize channel number
+// TODO Status fault when no data for some time
 
 #define REQUIRED VERSION(1, 6, 0)
 
@@ -142,6 +141,11 @@ void rtl_433_Callback(char *message) {
 		if (hum != 0 && temp != 0) {
 			HUM_1->hum->setVal(hum);
 			TEMP_1->temp->setVal(temp);
+			if (battery_ok == true) {
+				HUM_1->battery->setVal(0);
+			} else {
+				HUM_1->battery->setVal(1);
+			}
 		}
 	}
 
@@ -155,6 +159,11 @@ void rtl_433_Callback(char *message) {
 		if (hum != 0 && temp != 0) {
 			HUM_2->hum->setVal(hum);
 			TEMP_2->temp->setVal(temp);
+			if (battery_ok == true) {
+				HUM_2->battery->setVal(0);
+			} else {
+				HUM_2->battery->setVal(1);
+			}
 		}
 	}
 #endif
@@ -169,6 +178,11 @@ void rtl_433_Callback(char *message) {
 		if (hum != 0 && temp != 0) {
 			HUM_3->hum->setVal(hum);
 			TEMP_3->temp->setVal(temp);
+			if (battery_ok == true) {
+				HUM_3->battery->setVal(0);
+			} else {
+				HUM_3->battery->setVal(1);
+			}
 		}
 	}
 #endif
