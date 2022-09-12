@@ -74,6 +74,7 @@
 #endif
 
 #define JSON_MSG_BUFFER 512
+#define LED1            13
 
 void logJson(JsonObject &jsondata);
 
@@ -125,12 +126,19 @@ void rtl_433_Callback(char *message) {
 		channel++;
 	}
 
-	Serial.println("Model: " + (String)model);
-	Serial.println("ID: " + (String)id);
-	Serial.println("Channel: " + (String)channel);
-	Serial.println("Battery: " + battery);
-	Serial.println("Temperature: " + (String)temp);
-	Serial.println("Humidity: " + (String)hum);
+	LOG1("\n");
+	LOG1("Model: " + (String)model);
+	LOG1("\n");
+	LOG1("ID: " + (String)id);
+	LOG1("\n");
+	LOG1("Channel: " + (String)channel);
+	LOG1("\n");
+	LOG1("Battery: " + battery);
+	LOG1("\n");
+	LOG1("Temperature: " + (String)temp);
+	LOG1("\n");
+	LOG1("Humidity: " + (String)hum);
+	LOG1("\n");
 
 	if (channel == 1) {
 
@@ -204,6 +212,8 @@ void setup() {
 	Serial.begin(115200);
 
 	delay(1000);
+
+	pinMode(LED1, OUTPUT);
 
 	Log.begin(LOG_LEVEL, &Serial);
 	Log.notice(F(" " CR));
