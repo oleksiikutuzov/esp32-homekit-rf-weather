@@ -74,17 +74,19 @@
 #endif
 
 #define JSON_MSG_BUFFER 512
-#define LED1            13
+
+#define LED_CH1         13
+#define LED_CH2         21
+#define LED_CH3         17
+#define LED_STATUS      16
+#define BUTTON_PIN      15
 
 void logJson(JsonObject &jsondata);
+void blinkLed(int pin);
 
 char messageBuffer[JSON_MSG_BUFFER];
 
 rtl_433_ESP rf(-1); // use -1 to disable transmitter
-// ***
-
-#define BUTTON_PIN     0
-#define LED_STATUS_PIN 26
 
 WebServer server(80);
 
@@ -145,6 +147,7 @@ void rtl_433_Callback(char *message) {
 		Serial.println("Received on channel 1");
 
 		receivedPackets_1++;
+		blinkLed(LED_CH1);
 
 		if (hum != 0 && temp != 0) {
 			HUM_1->hum->setVal(hum);
@@ -163,6 +166,7 @@ void rtl_433_Callback(char *message) {
 		Serial.println("Received on channel 2");
 
 		receivedPackets_2++;
+		blinkLed(LED_CH2);
 
 		if (hum != 0 && temp != 0) {
 			HUM_2->hum->setVal(hum);
@@ -182,6 +186,7 @@ void rtl_433_Callback(char *message) {
 		Serial.println("Received on channel 3");
 
 		receivedPackets_3++;
+		blinkLed(LED_CH3);
 
 		if (hum != 0 && temp != 0) {
 			HUM_3->hum->setVal(hum);
@@ -211,9 +216,26 @@ void setup() {
 
 	Serial.begin(115200);
 
-	delay(1000);
+	pinMode(LED_CH1, OUTPUT);
 
-	pinMode(LED1, OUTPUT);
+#if NUM_CHANNELS >= 2
+	pinMode(LED_CH2, OUTPUT);
+#endif
+
+#if NUM_CHANNELS == 3
+	pinMode(LED_CH3, OUTPUT);
+#endif
+
+	// init blink all
+	blinkLed(LED_CH1);
+
+#if NUM_CHANNELS >= 2
+	blinkLed(LED_CH2);
+#endif
+
+#if NUM_CHANNELS == 3
+	blinkLed(LED_CH3);
+#endif
 
 	Log.begin(LOG_LEVEL, &Serial);
 	Log.notice(F(" " CR));
@@ -236,7 +258,7 @@ void setup() {
 	strcat(fw_ver, ")");
 
 	homeSpan.setControlPin(BUTTON_PIN);                        // Set button pin
-	homeSpan.setStatusPin(LED_STATUS_PIN);                     // Set status led pin
+	homeSpan.setStatusPin(LED_STATUS);                         // Set status led pin
 	homeSpan.setLogLevel(1);                                   // set log level
 	homeSpan.setPortNum(88);                                   // change port number for HomeSpan so we can use port 80 for the Web Server
 	homeSpan.setStatusAutoOff(10);                             // turn off status led after 10 seconds of inactivity
@@ -392,3 +414,10 @@ void setupWeb() {
 	server.begin();
 	Serial.println("HTTP server started");
 } // setupWeb
+
+void blinkLed(int pin) {
+
+	digitalWrite(pin, HIGH);
+	delay(100);
+	digitalWrite(pin, LOW);
+}
