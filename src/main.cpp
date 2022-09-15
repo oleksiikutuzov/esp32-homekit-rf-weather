@@ -278,14 +278,14 @@ void setup() {
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Temperature Sensor");
+	new Characteristic::Name("Temperature Sensor CH1");
 	new Characteristic::Model("Channel 1");
 	TEMP_1 = new DEV_TemperatureSensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Humidity Sensor");
+	new Characteristic::Name("Humidity Sensor CH1");
 	new Characteristic::Model("Channel 1");
 	HUM_1 = new DEV_HumiditySensor();
 
@@ -293,14 +293,14 @@ void setup() {
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Temperature Sensor");
+	new Characteristic::Name("Temperature Sensor CH2");
 	new Characteristic::Model("Channel 2");
 	TEMP_2 = new DEV_TemperatureSensor();
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Humidity Sensor");
+	new Characteristic::Name("Humidity Sensor CH2");
 	new Characteristic::Model("Channel 2");
 	HUM_2 = new DEV_HumiditySensor();
 #endif
@@ -309,14 +309,14 @@ void setup() {
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Temperature Sensor");
+	new Characteristic::Name("Temperature Sensor CH3");
 	new Characteristic::Model("Channel 3");
 	TEMP_3 = new DEV_TemperatureSensor();
 
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
-	new Characteristic::Name("Humidity Sensor");
+	new Characteristic::Name("Humidity Sensor CH3");
 	new Characteristic::Model("Channel 3");
 	HUM_3 = new DEV_HumiditySensor();
 #endif
