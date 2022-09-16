@@ -149,7 +149,7 @@ void rtl_433_Callback(char *message) {
 		receivedPackets_1++;
 		blinkLed(LED_CH1);
 
-		if (hum != 0 && temp != 0) {
+		if (hum > 0 && temp > 0) {
 			HUM_1->hum->setVal(hum);
 			TEMP_1->temp->setVal(temp);
 			if (battery_ok == true) {
@@ -168,7 +168,7 @@ void rtl_433_Callback(char *message) {
 		receivedPackets_2++;
 		blinkLed(LED_CH2);
 
-		if (hum != 0 && temp != 0) {
+		if (hum > 0 && temp > 0) {
 			HUM_2->hum->setVal(hum);
 			TEMP_2->temp->setVal(temp);
 			if (battery_ok == true) {
@@ -188,7 +188,7 @@ void rtl_433_Callback(char *message) {
 		receivedPackets_3++;
 		blinkLed(LED_CH3);
 
-		if (hum != 0 && temp != 0) {
+		if (hum > 0 && temp > 0) {
 			HUM_3->hum->setVal(hum);
 			TEMP_3->temp->setVal(temp);
 			if (battery_ok == true) {
