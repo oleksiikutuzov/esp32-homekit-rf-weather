@@ -32,11 +32,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio run -e esp32_1ch -e esp32_2ch -e esp32_3ch
+      run: pio run -e esp32
     - name: Copy Binaries
-      run: cp .pio/build/esp32_1ch/firmware.bin bin/esp32_rf_weather_1ch.bin;
-           cp .pio/build/esp32_2ch/firmware.bin bin/esp32_rf_weather_2ch.bin;
-           cp .pio/build/esp32_3ch/firmware.bin bin/esp32_rf_weather_3ch.bin
+      run: cp .pio/build/esp32/firmware.bin bin/esp32_rf_weather.bin
     - name: Commit Binaries
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
