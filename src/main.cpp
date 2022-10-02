@@ -94,7 +94,7 @@ DEV_Settings *SETTINGS;
 int                    led_pin[3] = {LED_CH1, LED_CH2, LED_CH3};
 DEV_TemperatureSensor *TEMP_SENSORS[3];
 DEV_HumiditySensor    *HUM_SENSORS[3];
-int                    receivedPackets[3] = {0};
+int                    receivedPackets[3];
 
 void rtl_433_Callback(char *message) {
 	DynamicJsonBuffer jsonBuffer2(JSON_MSG_BUFFER);
@@ -156,12 +156,7 @@ void rtl_433_Callback(char *message) {
 }
 
 void logJson(JsonObject &jsondata) {
-#if defined(ESP8266) || defined(ESP32) || defined(__AVR_ATmega2560__) || \
-    defined(__AVR_ATmega1280__)
 	char JSONmessageBuffer[jsondata.measureLength() + 1];
-#else
-	char JSONmessageBuffer[JSON_MSG_BUFFER];
-#endif
 	jsondata.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
 	Log.notice(F("Received message : %s" CR), JSONmessageBuffer);
 }
