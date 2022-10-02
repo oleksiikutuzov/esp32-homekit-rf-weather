@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: [esp32_1ch, esp32_2ch, esp32_3ch]
+        environment: [esp32]
 
     steps:
     - uses: actions/checkout@v2

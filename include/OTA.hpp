@@ -6,16 +6,9 @@
 #include <WiFiClientSecure.h>
 
 #define URL_fw_Version "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-weather/main/bin_version.txt"
+#define URL_fw_Bin     "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-weather/main/bin/esp32_rf_weather.bin"
 
-#if NUM_CHANNELS == 1
-	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-weather/main/bin/esp32_rf_weather_1ch.bin"
-#elif NUM_CHANNELS == 2
-	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-weather/main/bin/esp32_rf_weather_2ch.bin"
-#elif NUM_CHANNELS == 3
-	#define URL_fw_Bin "https://raw.githubusercontent.com/oleksiikutuzov/esp32-homekit-rf-weather/main/bin/esp32_rf_weather_3ch.bin"
-#endif
-
-#define FW_VERSION "1.1.1"
+#define FW_VERSION     "1.2.0"
 
 String FirmwareVer = {
     FW_VERSION};
