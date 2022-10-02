@@ -1,23 +1,21 @@
 #include <HomeSpan.h>
 
 // clang-format off
-CUSTOM_CHAR(Selector, 00000001-0001-0001-0001-46637266EA00, PR + PW + EV, UINT8, 1, 1, 3, false); // create Custom Characteristic to "select" special effects via Eve App
-CUSTOM_CHAR(LedsOn, 00000002-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, true);
-CUSTOM_CHAR(AutoUpdate, 00000003-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, true);
-CUSTOM_CHAR_STRING(IPAddress, 00000004-0001-0001-0001-46637266EA00, PR + EV, "");
+CUSTOM_SERV(Settings, 00000001-0001-0001-0001-46637266EA00);
+CUSTOM_CHAR(Selector, 00000002-0001-0001-0001-46637266EA00, PR + PW + EV, UINT8, 1, 1, 3, false); // create Custom Characteristic to "select" special effects via Eve App
+CUSTOM_CHAR(LedsOn, 00000003-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, true);
+CUSTOM_CHAR(AutoUpdate, 00000004-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, true);
+CUSTOM_CHAR_STRING(IPAddress, 00000005-0001-0001-0001-46637266EA00, PR + EV, "");
 // clang-format on
 
-struct DEV_Settings : Service::StatelessProgrammableSwitch {
+struct DEV_Settings : Service::Settings {
 
-	SpanCharacteristic        *switchEvent;
 	Characteristic::Selector   num_sensors{1, true};
 	Characteristic::LedsOn     leds_on{true, true};
 	Characteristic::AutoUpdate auto_update{true, true};
 	Characteristic::IPAddress  ip_address{"0.0.0.0"};
 
-	DEV_Settings() : Service::StatelessProgrammableSwitch() { // constructor() method
-
-		switchEvent = new Characteristic::ProgrammableSwitchEvent();
+	DEV_Settings() : Service::Settings() { // constructor() method
 
 		num_sensors.setUnit(""); // configures custom "Selector" characteristic for use with Eve HomeKit
 		num_sensors.setDescription("Number of channels");
