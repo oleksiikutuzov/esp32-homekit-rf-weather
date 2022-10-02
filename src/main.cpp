@@ -51,11 +51,11 @@
 
 // TODO Status fault when no data for some time
 
-#define REQUIRED VERSION(1, 6, 0)
+#define REQUIRED     VERSION(1, 6, 0)
 
-#ifndef NUM_CHANNELS
-	#define NUM_CHANNELS 3 // set number of channels here (1...3)
-#endif
+// #ifndef NUM_CHANNELS
+#define NUM_CHANNELS 3 // set number of channels here (1...3)
+// #endif
 
 #include "DEV_Sensors.hpp"
 #include "OTA.hpp"
@@ -94,6 +94,7 @@ char sNumber[18] = "11:11:11:11:11:11";
 
 void setupWeb();
 
+DEV_Settings          *SETTINGS;
 DEV_TemperatureSensor *TEMP_1;
 DEV_HumiditySensor    *HUM_1;
 int                    receivedPackets_1 = 0;
@@ -142,12 +143,17 @@ void rtl_433_Callback(char *message) {
 	LOG1("Humidity: " + (String)hum);
 	LOG1("\n");
 
-	if (channel == 1) {
+	// get number of channels
+	int sensors = SETTINGS->num_sensors.getVal();
+
+	if (sensors > 0 && channel == 1) {
 
 		Serial.println("Received on channel 1");
 
 		receivedPackets_1++;
-		blinkLed(LED_CH1);
+		if (SETTINGS->leds_on.getVal() == true) {
+			blinkLed(LED_CH1);
+		}
 
 		if (hum > 0 && temp > 0) {
 			HUM_1->hum->setVal(hum);
@@ -160,13 +166,14 @@ void rtl_433_Callback(char *message) {
 		}
 	}
 
-#if NUM_CHANNELS >= 2
-	if (channel == 2) {
+	if (sensors > 1 && channel == 2) {
 
 		Serial.println("Received on channel 2");
 
 		receivedPackets_2++;
-		blinkLed(LED_CH2);
+		if (SETTINGS->leds_on.getVal() == true) {
+			blinkLed(LED_CH2);
+		}
 
 		if (hum > 0 && temp > 0) {
 			HUM_2->hum->setVal(hum);
@@ -178,10 +185,8 @@ void rtl_433_Callback(char *message) {
 			}
 		}
 	}
-#endif
 
-#if NUM_CHANNELS == 3
-	if (channel == 3) {
+	if (sensors > 2 && channel == 3) {
 
 		Serial.println("Received on channel 3");
 
@@ -198,7 +203,6 @@ void rtl_433_Callback(char *message) {
 			}
 		}
 	}
-#endif
 }
 
 void logJson(JsonObject &jsondata) {
@@ -215,27 +219,6 @@ void logJson(JsonObject &jsondata) {
 void setup() {
 
 	Serial.begin(115200);
-
-	pinMode(LED_CH1, OUTPUT);
-
-#if NUM_CHANNELS >= 2
-	pinMode(LED_CH2, OUTPUT);
-#endif
-
-#if NUM_CHANNELS == 3
-	pinMode(LED_CH3, OUTPUT);
-#endif
-
-	// init blink all
-	blinkLed(LED_CH1);
-
-#if NUM_CHANNELS >= 2
-	blinkLed(LED_CH2);
-#endif
-
-#if NUM_CHANNELS == 3
-	blinkLed(LED_CH3);
-#endif
 
 	Log.begin(LOG_LEVEL, &Serial);
 	Log.notice(F(" " CR));
@@ -278,6 +261,28 @@ void setup() {
 	new SpanAccessory();
 	new Service::AccessoryInformation();
 	new Characteristic::Identify();
+	new Characteristic::Name("RF Weather Bridge Settings");
+	SETTINGS = new DEV_Settings();
+
+	// get number of channels
+	int sensors = SETTINGS->num_sensors.getVal();
+
+	pinMode(LED_CH1, OUTPUT);
+	pinMode(LED_CH2, OUTPUT);
+	pinMode(LED_CH3, OUTPUT);
+
+	// init blink all
+	blinkLed(LED_CH1);
+
+	if (sensors > 1)
+		blinkLed(LED_CH2);
+
+	if (sensors > 2)
+		blinkLed(LED_CH3);
+
+	new SpanAccessory();
+	new Service::AccessoryInformation();
+	new Characteristic::Identify();
 	new Characteristic::Name("Temperature Sensor CH1");
 	new Characteristic::Model("Channel 1");
 	TEMP_1 = new DEV_TemperatureSensor(); // Create a Temperature Sensor (see DEV_Sensors.h for definition)
@@ -289,43 +294,44 @@ void setup() {
 	new Characteristic::Model("Channel 1");
 	HUM_1 = new DEV_HumiditySensor();
 
-#if NUM_CHANNELS >= 2
-	new SpanAccessory();
-	new Service::AccessoryInformation();
-	new Characteristic::Identify();
-	new Characteristic::Name("Temperature Sensor CH2");
-	new Characteristic::Model("Channel 2");
-	TEMP_2 = new DEV_TemperatureSensor();
+	if (sensors > 1) {
+		new SpanAccessory();
+		new Service::AccessoryInformation();
+		new Characteristic::Identify();
+		new Characteristic::Name("Temperature Sensor CH2");
+		new Characteristic::Model("Channel 2");
+		TEMP_2 = new DEV_TemperatureSensor();
 
-	new SpanAccessory();
-	new Service::AccessoryInformation();
-	new Characteristic::Identify();
-	new Characteristic::Name("Humidity Sensor CH2");
-	new Characteristic::Model("Channel 2");
-	HUM_2 = new DEV_HumiditySensor();
-#endif
+		new SpanAccessory();
+		new Service::AccessoryInformation();
+		new Characteristic::Identify();
+		new Characteristic::Name("Humidity Sensor CH2");
+		new Characteristic::Model("Channel 2");
+		HUM_2 = new DEV_HumiditySensor();
+	}
 
-#if NUM_CHANNELS == 3
-	new SpanAccessory();
-	new Service::AccessoryInformation();
-	new Characteristic::Identify();
-	new Characteristic::Name("Temperature Sensor CH3");
-	new Characteristic::Model("Channel 3");
-	TEMP_3 = new DEV_TemperatureSensor();
+	if (sensors > 2) {
+		new SpanAccessory();
+		new Service::AccessoryInformation();
+		new Characteristic::Identify();
+		new Characteristic::Name("Temperature Sensor CH3");
+		new Characteristic::Model("Channel 3");
+		TEMP_3 = new DEV_TemperatureSensor();
 
-	new SpanAccessory();
-	new Service::AccessoryInformation();
-	new Characteristic::Identify();
-	new Characteristic::Name("Humidity Sensor CH3");
-	new Characteristic::Model("Channel 3");
-	HUM_3 = new DEV_HumiditySensor();
-#endif
+		new SpanAccessory();
+		new Service::AccessoryInformation();
+		new Characteristic::Identify();
+		new Characteristic::Name("Humidity Sensor CH3");
+		new Characteristic::Model("Channel 3");
+		HUM_3 = new DEV_HumiditySensor();
+	}
 }
 
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	repeatedCall();
+	if (SETTINGS->auto_update.getVal() == true)
+		repeatedCall();
 	rf.loop();
 }
 
@@ -336,15 +342,15 @@ void setupWeb() {
 		float temp_1 = TEMP_1->temp->getVal<float>();
 		float hum_1  = HUM_1->hum->getVal<float>();
 
-#if NUM_CHANNELS >= 2
+		// get number of channels
+		int sensors = SETTINGS->num_sensors.getVal();
+
 		float temp_2 = TEMP_2->temp->getVal<float>();
 		float hum_2  = HUM_2->hum->getVal<float>();
-#endif
 
-#if NUM_CHANNELS == 3
 		float temp_3 = TEMP_3->temp->getVal<float>();
 		float hum_3  = HUM_3->hum->getVal<float>();
-#endif
+
 		float  uptime       = esp_timer_get_time() / (6 * 10e6);
 		float  heap         = esp_get_free_heap_size();
 		String uptimeMetric = "# HELP uptime Sensor uptime\nhomekit_uptime{device=\"rf_bridge\",location=\"home\"} " + String(int(uptime));
@@ -366,7 +372,6 @@ void setupWeb() {
 		LOG1(receivedMetric_1);
 		LOG1("\n");
 
-#if NUM_CHANNELS >= 2
 		String tempMetric_2     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(temp_2);
 		String humMetric_2      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(hum_2);
 		String receivedMetric_2 = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"2\",location=\"home\"} " + String(receivedPackets_2);
@@ -377,9 +382,7 @@ void setupWeb() {
 		LOG1("\n");
 		LOG1(receivedMetric_2);
 		LOG1("\n");
-#endif
 
-#if NUM_CHANNELS == 3
 		String tempMetric_3     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(temp_2);
 		String humMetric_3      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(hum_2);
 		String receivedMetric_3 = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"3\",location=\"home\"} " + String(receivedPackets_2);
@@ -390,15 +393,15 @@ void setupWeb() {
 		LOG1("\n");
 		LOG1(receivedMetric_3);
 		LOG1("\n");
-#endif
 
-#if NUM_CHANNELS == 1
-		server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1);
-#elif NUM_CHANNELS == 2
-		    server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2);
-#elif NUM_CHANNELS == 3
-		    server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2 + "\n" + tempMetric_3 + "\n" + humMetric_3 + "\n" + receivedMetric_3);
-#endif
+		if (sensors == 1) {
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1);
+		} else if (sensors == 2) {
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2);
+		} else if (sensors == 3) {
+
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + tempMetric_1 + "\n" + humMetric_1 + "\n" + receivedMetric_1 + "\n" + tempMetric_2 + "\n" + humMetric_2 + "\n" + receivedMetric_2 + "\n" + tempMetric_3 + "\n" + humMetric_3 + "\n" + receivedMetric_3);
+		}
 	});
 
 	server.on("/reboot", HTTP_GET, []() {
@@ -410,6 +413,7 @@ void setupWeb() {
 		ESP.restart();
 	});
 
+	SETTINGS->ip_address.setString(WiFi.localIP().toString().c_str());
 	ElegantOTA.begin(&server); // Start ElegantOTA
 	server.begin();
 	Serial.println("HTTP server started");
