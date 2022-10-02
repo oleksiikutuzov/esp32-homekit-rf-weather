@@ -294,9 +294,9 @@ void setupWeb() {
 		LOG1("\n");
 
 		for (int i = 0; i < sensors; i++) {
-			temp_metrics[i]     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[0]);
-			hum_metrics[i]      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[0]);
-			received_metrics[i] = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(receivedPackets[0]);
+			temp_metrics[i]     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[i]);
+			hum_metrics[i]      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[i]);
+			received_metrics[i] = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(receivedPackets[i]);
 
 			LOG1(temp_metrics[i]);
 			LOG1("\n");
