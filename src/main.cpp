@@ -152,6 +152,7 @@ void rtl_433_Callback(char *message) {
 				}
 
 				HUM_SENSORS[i]->hum->setVal(hum);
+				HUM_SENSORS[i]->fault->setVal(0);
 				TEMP_SENSORS[i]->temp->setVal(temp);
 				if (battery_ok == true) {
 					HUM_SENSORS[i]->battery->setVal(0);

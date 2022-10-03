@@ -69,6 +69,7 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 	SpanCharacteristic *hum;     // reference to the Humidity Characteristic
 	SpanCharacteristic *battery; // reference to Low Battery Characteristic
+	SpanCharacteristic *fault;   // reference to Fault Characteristic
 
 	DEV_HumiditySensor() : Service::HumiditySensor() { // constructor() method
 
@@ -76,8 +77,18 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 		battery = new Characteristic::StatusLowBattery();
 
+		fault = new Characteristic::StatusFault(0);
+
 		LOG0("Configuring Humidity Sensor"); // initialization message
 		LOG0("\n");
 
 	} // end constructor
+
+	void loop() {
+
+		if (hum->timeVal() > 120000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
+			fault->setVal(1);                              // set fault state
+			LOG1("Sensor update: FAULT\n");
+		}
+	} // loop
 };
