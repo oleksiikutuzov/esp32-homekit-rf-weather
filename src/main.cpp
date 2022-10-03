@@ -71,11 +71,19 @@
 
 #define JSON_MSG_BUFFER 512
 
-#define LED_CH1         13
-#define LED_CH2         21
-#define LED_CH3         17
-#define LED_STATUS      16
-#define BUTTON_PIN      15
+#ifdef DEV_BOARD
+	#define LED_CH1    13
+	#define LED_CH2    21
+	#define LED_CH3    17
+	#define LED_STATUS 16
+	#define BUTTON_PIN 15
+#else
+	#define LED_CH1    13
+	#define LED_CH2    15
+	#define LED_CH3    17
+	#define LED_STATUS 32
+	#define BUTTON_PIN 21
+#endif
 
 void logJson(JsonObject &jsondata);
 void blinkLed(int pin);
