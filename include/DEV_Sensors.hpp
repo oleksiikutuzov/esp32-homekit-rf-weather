@@ -13,7 +13,7 @@ struct DEV_Settings : Service::Settings {
 
 	Characteristic::Selector   num_sensors{1, true};
 	Characteristic::LedsOn     leds_on{true, true};
-	Characteristic::AutoUpdate auto_update{true, true};
+	Characteristic::AutoUpdate auto_update{false, true};
 	Characteristic::IPAddress  ip_address{"0.0.0.0"};
 	Characteristic::Reboot     reboot{false, false};
 
