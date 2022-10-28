@@ -4,18 +4,16 @@
 CUSTOM_SERV(Settings, 00000001-0001-0001-0001-46637266EA00);
 CUSTOM_CHAR(Selector, 00000002-0001-0001-0001-46637266EA00, PR + PW + EV, UINT8, 1, 1, 3, false); // create Custom Characteristic to "select" special effects via Eve App
 CUSTOM_CHAR(LedsOn, 00000003-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, false);
-CUSTOM_CHAR(AutoUpdate, 00000004-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, false);
 CUSTOM_CHAR_STRING(IPAddress, 00000005-0001-0001-0001-46637266EA00, PR + EV, "");
 CUSTOM_CHAR(Reboot, 00000006-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, false);
 // clang-format on
 
 struct DEV_Settings : Service::Settings {
 
-	Characteristic::Selector   num_sensors{1, true};
-	Characteristic::LedsOn     leds_on{true, true};
-	Characteristic::AutoUpdate auto_update{false, true};
-	Characteristic::IPAddress  ip_address{"0.0.0.0"};
-	Characteristic::Reboot     reboot{false, false};
+	Characteristic::Selector  num_sensors{1, true};
+	Characteristic::LedsOn    leds_on{true, true};
+	Characteristic::IPAddress ip_address{"0.0.0.0"};
+	Characteristic::Reboot    reboot{false, false};
 
 	DEV_Settings() : Service::Settings() { // constructor() method
 
@@ -24,8 +22,6 @@ struct DEV_Settings : Service::Settings {
 		num_sensors.setRange(1, 3, 1);
 
 		leds_on.setDescription("Blink LEDs on receive");
-
-		auto_update.setDescription("Auto OTA Update");
 
 		ip_address.setDescription("IP Address");
 

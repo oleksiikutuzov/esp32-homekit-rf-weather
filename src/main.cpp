@@ -25,10 +25,10 @@
  *
  ********************************************************************************/
 
-#define REQUIRED VERSION(1, 6, 0)
+#define REQUIRED   VERSION(1, 6, 0)
+#define FW_VERSION "1.2.0"
 
 #include "DEV_Sensors.hpp"
-#include "OTA.hpp"
 #include <ElegantOTA.h>
 #include <HomeSpan.h>
 #include <WebServer.h>
@@ -158,7 +158,7 @@ void setup() {
 	Log.notice(F("****** setup complete ******" CR));
 
 	Serial.print("Active firmware version: ");
-	Serial.println(FirmwareVer);
+	Serial.println(FW_VERSION);
 
 	String     temp           = FW_VERSION;
 	const char compile_date[] = __DATE__ " " __TIME__;
@@ -242,8 +242,7 @@ void setup() {
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	if (SETTINGS->auto_update.getVal() == true)
-		repeatedCall();
+	// TODO disable if configuration mode is entered
 	rf.loop();
 }
 
