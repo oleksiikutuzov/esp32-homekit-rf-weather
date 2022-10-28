@@ -86,8 +86,8 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 	void loop() {
 
-		if (hum->timeVal() > 120000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
-			fault->setVal(1);                              // set fault state
+		if (hum->timeVal() > 5 * 60 * 1000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
+			fault->setVal(1);                                     // set fault state
 			LOG1("Sensor update: FAULT\n");
 		}
 	} // loop

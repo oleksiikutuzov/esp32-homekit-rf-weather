@@ -25,32 +25,6 @@
  *
  ********************************************************************************/
 
-/*
- *                  ESP-WROOM-32 Utilized pins
- *                ╔═════════════════════════════╗
- *                ║┌─┬─┐  ┌──┐  ┌─┐             ║
- *                ║│ | └──┘  └──┘ |             ║
- *                ║│ |            |             ║
- *                ╠═════════════════════════════╣
- *            +++ ║GND                       GND║ +++
- *            +++ ║3.3V                     IO23║ USED_FOR_NOTHING
- *                ║                         IO22║
- *                ║IO36                      IO1║ TX
- *                ║IO39                      IO3║ RX
- *                ║IO34                     IO21║
- *                ║IO35                         ║ NC
- *        RED_LED ║IO32                     IO19║
- *                ║IO33                     IO18║
- *                ║IO25                      IO5║
- *     LED_YELLOW ║IO26                     IO17║
- *                ║IO27                     IO16║ NEOPIXEL
- *                ║IO14                      IO4║
- *                ║IO12                      IO0║ +++, BUTTONS
- *                ╚═════════════════════════════╝
- */
-
-// TODO Status fault when no data for some time
-
 #define REQUIRED VERSION(1, 6, 0)
 
 #include "DEV_Sensors.hpp"
