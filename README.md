@@ -74,12 +74,14 @@ In the `platformio.ini` file set the default environment to `esp32_dev_board` or
 
 Custom PCB is designed for the project. Currently for regular ESP32 boards.
 
-![render](./images/pcb.png)
+![render](./images/pcb_enclosure.png)
 
 ## Connect to HomeKit
 
 1. Plug your LED Controller to power
-2. The access point should start automatically. Later you can manually enter configuration mode (More on [HomeSpan User Guide](https://github.com/HomeSpan/HomeSpan/blob/master/docs/UserGuide.md))
+2. The access point should start automatically. 
+> **Note**
+> Later you can manually enter configuration mode (More on [HomeSpan User Guide](https://github.com/HomeSpan/HomeSpan/blob/master/docs/UserGuide.md))
 3. Go to WiFi settings on your iPhone/iPad and connect to the "HomeSpan-Setup" WiFi network
 4. You will choose your WiFi network and set the setup code for the accessory
 5. Go to your Home app and select "Add Accessory"
