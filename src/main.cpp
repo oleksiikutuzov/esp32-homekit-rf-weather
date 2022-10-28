@@ -25,36 +25,10 @@
  *
  ********************************************************************************/
 
-/*
- *                  ESP-WROOM-32 Utilized pins
- *                ╔═════════════════════════════╗
- *                ║┌─┬─┐  ┌──┐  ┌─┐             ║
- *                ║│ | └──┘  └──┘ |             ║
- *                ║│ |            |             ║
- *                ╠═════════════════════════════╣
- *            +++ ║GND                       GND║ +++
- *            +++ ║3.3V                     IO23║ USED_FOR_NOTHING
- *                ║                         IO22║
- *                ║IO36                      IO1║ TX
- *                ║IO39                      IO3║ RX
- *                ║IO34                     IO21║
- *                ║IO35                         ║ NC
- *        RED_LED ║IO32                     IO19║
- *                ║IO33                     IO18║
- *                ║IO25                      IO5║
- *     LED_YELLOW ║IO26                     IO17║
- *                ║IO27                     IO16║ NEOPIXEL
- *                ║IO14                      IO4║
- *                ║IO12                      IO0║ +++, BUTTONS
- *                ╚═════════════════════════════╝
- */
-
-// TODO Status fault when no data for some time
-
-#define REQUIRED VERSION(1, 6, 0)
+#define REQUIRED   VERSION(1, 6, 0)
+#define FW_VERSION "1.2.0"
 
 #include "DEV_Sensors.hpp"
-#include "OTA.hpp"
 #include <ElegantOTA.h>
 #include <HomeSpan.h>
 #include <WebServer.h>
@@ -71,11 +45,19 @@
 
 #define JSON_MSG_BUFFER 512
 
-#define LED_CH1         13
-#define LED_CH2         21
-#define LED_CH3         17
-#define LED_STATUS      16
-#define BUTTON_PIN      15
+#ifdef DEV_BOARD
+	#define LED_CH1    13
+	#define LED_CH2    21
+	#define LED_CH3    17
+	#define LED_STATUS 16
+	#define BUTTON_PIN 15
+#else
+	#define LED_CH1    13
+	#define LED_CH2    15
+	#define LED_CH3    17
+	#define LED_STATUS 32
+	#define BUTTON_PIN 21
+#endif
 
 void logJson(JsonObject &jsondata);
 void blinkLed(int pin);
@@ -144,6 +126,7 @@ void rtl_433_Callback(char *message) {
 				}
 
 				HUM_SENSORS[i]->hum->setVal(hum);
+				HUM_SENSORS[i]->fault->setVal(0);
 				TEMP_SENSORS[i]->temp->setVal(temp);
 				if (battery_ok == true) {
 					HUM_SENSORS[i]->battery->setVal(0);
@@ -175,7 +158,7 @@ void setup() {
 	Log.notice(F("****** setup complete ******" CR));
 
 	Serial.print("Active firmware version: ");
-	Serial.println(FirmwareVer);
+	Serial.println(FW_VERSION);
 
 	String     temp           = FW_VERSION;
 	const char compile_date[] = __DATE__ " " __TIME__;
@@ -259,8 +242,7 @@ void setup() {
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	if (SETTINGS->auto_update.getVal() == true)
-		repeatedCall();
+	// TODO disable if configuration mode is entered
 	rf.loop();
 }
 
@@ -294,9 +276,9 @@ void setupWeb() {
 		LOG1("\n");
 
 		for (int i = 0; i < sensors; i++) {
-			temp_metrics[i]     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[0]);
-			hum_metrics[i]      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[0]);
-			received_metrics[i] = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(receivedPackets[0]);
+			temp_metrics[i]     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[i]);
+			hum_metrics[i]      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[i]);
+			received_metrics[i] = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(receivedPackets[i]);
 
 			LOG1(temp_metrics[i]);
 			LOG1("\n");

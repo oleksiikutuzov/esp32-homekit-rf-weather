@@ -1,0 +1,25 @@
+Partlist exported from /var/folders/tq/b2m_bkf11ld61j4hqq2g93cr0000gn/T/Neutron/ElectronFileOutput/48587/sch-562322ec-a9bd-47c2-8610-2d14c827d28f/Schematic v1.0 v14.sch at 28.10.22 16:01
+
+Part Value                   Device                   Package                    Description                                                                 
+C1   10uF                    C_CHIP-0603(1608-METRIC) CAPC1608X85                Capacitor - Generic                                                         
+C2   10uF                    C_CHIP-0603(1608-METRIC) CAPC1608X85                Capacitor - Generic                                                         
+D1   LED                     CHIP-FLAT-R_0603-0.80MM  LEDC1608X80N_FLAT-R                                                                                    
+D2   LED                     CHIP-FLAT-R_0603-0.80MM  LEDC1608X80N_FLAT-R                                                                                    
+D3   LED                     CHIP-FLAT-R_0603-0.80MM  LEDC1608X80N_FLAT-R                                                                                    
+D4   LED                     CHIP-FLAT-R_0603-0.80MM  LEDC1608X80N_FLAT-R                                                                                    
+J1   USB4125-GF-A_REVA       UJC-VP-3-SMT-TR          CUI_UJC-VP-3-SMT-TR        USB Receptacle                                                              
+J3   ESPFLASH-2X3-2.54-PLAIN ESPFLASH-2X3-2.54-PLAIN  2X3-2.54-PLAIN             ESPFlash                                                                    
+JP1  PINHD-2X4               PINHD-2X4                2X04                       PIN HEADER                                                                  
+R1   5.1k                    R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R2   5.1k                    R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R3   4.7K                    R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R4   4.7K                    R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R5   430                     R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R6   430                     R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R7   430                     R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+R8   430                     R_CHIP-0603(1608-METRIC) RESC1608X60                Resistor Fixed - Generic                                                    
+S1   SKRPACE010              SKRPACE010               SW_SKRPACE010              Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 2.55N SMD Automotive T/R 
+S2   SKRPACE010              SKRPACE010               SW_SKRPACE010              Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 2.55N SMD Automotive T/R 
+U$1  MOMENTARY-SWITCH        MOMENTARY-SWITCH         SWITCH-MOMENTARY                                                                                       
+U1   AP2112K-3.3TRG1         AP2112K-3.3TRG1          SOT95P285X140-5N           AP2112 Series 0.6 A 3.3 V Fixed Output SMT LDO Linear Regulator - SOT23-5   
+U2   ESP32-WROOM-32(8MB)     ESP32-WROOM-32(8MB)      MODULE_ESP32-WROOM-32(8MB) WIFI MODULE 64 MBITS SPI FLASH                                              
