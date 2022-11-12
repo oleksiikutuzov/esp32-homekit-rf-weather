@@ -75,7 +75,7 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 		fault = new Characteristic::StatusFault(0);
 
-		LOG0("Configuring Humidity Sensor"); // initialization message
+ 		LOG0("Configuring Humidity Sensor"); // initialization message
 		LOG0("\n");
 
 	} // end constructor

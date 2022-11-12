@@ -25,7 +25,7 @@
  *
  ********************************************************************************/
 
-#define REQUIRED   VERSION(1, 6, 0)
+#define REQUIRED   VERSION(1, 7, 0)
 #define FW_VERSION "1.2.0"
 
 #include "DEV_Sensors.hpp"
@@ -62,6 +62,7 @@
 void logJson(JsonObject &jsondata);
 void blinkLed(int pin);
 void setupWeb();
+void statusUpdate(HS_STATUS status);
 
 char messageBuffer[JSON_MSG_BUFFER];
 
@@ -103,22 +104,20 @@ void rtl_433_Callback(char *message) {
 	for (int i = 0; i < sensors; i++) {
 		if (hum > 0 && temp > 0) {
 			if (i + 1 == channel) {
-				LOG1("\n");
-				LOG1("Received on channel " + String(i + 1));
-
-				LOG1("\n");
-				LOG1("Model: " + (String)model);
-				LOG1("\n");
-				LOG1("ID: " + (String)id);
-				LOG1("\n");
-				LOG1("Channel: " + (String)channel);
-				LOG1("\n");
-				LOG1("Battery: " + battery);
-				LOG1("\n");
-				LOG1("Temperature: " + (String)temp);
-				LOG1("\n");
-				LOG1("Humidity: " + (String)hum);
-				LOG1("\n");
+				/********** block of 6 lines **********/
+				LOG0("\n");
+				LOG0("RX on channel " + String(i + 1));
+				LOG0("\n");
+				LOG0("Model: " + (String)model);
+				LOG0("\n");
+				LOG0("ID: " + (String)id);
+				LOG0(" Battery: " + battery);
+				LOG0("\n");
+				LOG0("Temperature: " + (String)temp);
+				LOG0("\n");
+				LOG0("Humidity: " + (String)hum);
+				LOG0("\n");
+				/********** block of 6 lines **********/
 
 				receivedPackets[i]++;
 				if (led_on == true) {
@@ -141,7 +140,7 @@ void rtl_433_Callback(char *message) {
 void logJson(JsonObject &jsondata) {
 	char JSONmessageBuffer[jsondata.measureLength() + 1];
 	jsondata.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
-	Log.notice(F("Received message : %s" CR), JSONmessageBuffer);
+	// Log.notice(F("Received message : %s" CR), JSONmessageBuffer);
 }
 
 void setup() {
@@ -170,7 +169,7 @@ void setup() {
 
 	homeSpan.setControlPin(BUTTON_PIN);                        // Set button pin
 	homeSpan.setStatusPin(LED_STATUS);                         // Set status led pin
-	homeSpan.setLogLevel(1);                                   // set log level
+	homeSpan.setLogLevel(0);                                   // set log level
 	homeSpan.setPortNum(88);                                   // change port number for HomeSpan so we can use port 80 for the Web Server
 	homeSpan.setStatusAutoOff(10);                             // turn off status led after 10 seconds of inactivity
 	homeSpan.setWifiCallback(setupWeb);                        // need to start Web Server after WiFi is established
@@ -178,6 +177,7 @@ void setup() {
 	homeSpan.enableWebLog(10, "pool.ntp.org", "UTC", "myLog"); // enable Web Log
 	homeSpan.enableAutoStartAP();                              // enable auto start AP
 	homeSpan.setSketchVersion(fw_ver);
+	homeSpan.setStatusCallback(statusUpdate);
 
 	homeSpan.begin(Category::Bridges, "HomeSpan RF Weather Bridge");
 
@@ -204,45 +204,34 @@ void setup() {
 		// blink led
 		blinkLed(led_pin[i]);
 
-		String channel_string   = "Channel ";
-		String temp_name_string = "Temperature Sensor CH";
-		String hum_name_string  = "Humidity Sensor CH";
+		String channel_string     = "Channel ";
+		String sensor_name_string = "Temperature and Humidity Sensor CH";
 
-		char *channel_char   = new char[channel_string.length() + 2];
-		char *temp_name_char = new char[temp_name_string.length() + 2];
-		char *hum_name_char  = new char[hum_name_string.length() + 2];
-		char  channel_num[1];
+		char *channel_char     = new char[channel_string.length() + 2];
+		char *sensor_name_char = new char[sensor_name_string.length() + 2];
+		char  channel_num[2];
 
 		sprintf(channel_num, "%d", i + 1);
 
 		strcpy(channel_char, channel_string.c_str());
-		strcpy(temp_name_char, temp_name_string.c_str());
-		strcpy(hum_name_char, hum_name_string.c_str());
+		strcpy(sensor_name_char, sensor_name_string.c_str());
 
 		strcat(channel_char, channel_num);
-		strcat(temp_name_char, channel_num);
-		strcat(hum_name_char, channel_num);
+		strcat(sensor_name_char, channel_num);
 
 		new SpanAccessory();
 		new Service::AccessoryInformation();
 		new Characteristic::Identify();
-		new Characteristic::Name(temp_name_char);
+		new Characteristic::Name(sensor_name_char);
 		new Characteristic::Model(channel_char);
 		TEMP_SENSORS[i] = new DEV_TemperatureSensor();
-
-		new SpanAccessory();
-		new Service::AccessoryInformation();
-		new Characteristic::Identify();
-		new Characteristic::Name(hum_name_char);
-		new Characteristic::Model(channel_char);
-		HUM_SENSORS[i] = new DEV_HumiditySensor();
+		HUM_SENSORS[i]  = new DEV_HumiditySensor();
 	}
 }
 
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	// TODO disable if configuration mode is entered
 	rf.loop();
 }
 
@@ -317,4 +306,9 @@ void blinkLed(int pin) {
 	digitalWrite(pin, HIGH);
 	delay(100);
 	digitalWrite(pin, LOW);
+}
+
+// create a callback function that simply prints the pre-defined short messages on the Serial Monitor whenever the HomeSpan status changes
+void statusUpdate(HS_STATUS status) {
+	Serial.printf("\n*** HOMESPAN STATUS CHANGE: %s\n", homeSpan.statusString(status));
 }
