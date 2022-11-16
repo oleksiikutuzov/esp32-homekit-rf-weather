@@ -75,7 +75,6 @@ DEV_Settings *SETTINGS;
 int                    led_pin[3] = {LED_CH1, LED_CH2, LED_CH3};
 DEV_TemperatureSensor *TEMP_SENSORS[3];
 DEV_HumiditySensor    *HUM_SENSORS[3];
-int                    receivedPackets[3];
 
 void rtl_433_Callback(char *message) {
 	DynamicJsonBuffer jsonBuffer2(JSON_MSG_BUFFER);
@@ -117,11 +116,11 @@ void rtl_433_Callback(char *message) {
 				LOG0("\n");
 				/********** block of 6 lines **********/
 
-				receivedPackets[i]++;
 				if (led_on == true) {
 					blinkLed(led_pin[i]);
 				}
 
+				HUM_SENSORS[i]->last_received_val = 0;
 				HUM_SENSORS[i]->hum->setVal(hum);
 				HUM_SENSORS[i]->fault->setVal(0);
 				TEMP_SENSORS[i]->temp->setVal(temp);
@@ -233,7 +232,7 @@ void loop() {
 }
 
 void setupWeb() {
-	LOG0("Starting Air Quality Sensor Server Hub...\n\n");
+	LOG0("Starting Air Sensor Hub...\n\n");
 
 	server.on("/metrics", HTTP_GET, []() {
 		// get number of channels
@@ -262,24 +261,21 @@ void setupWeb() {
 		LOG1("\n");
 
 		for (int i = 0; i < sensors; i++) {
-			temp_metrics[i]     = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[i]);
-			hum_metrics[i]      = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[i]);
-			received_metrics[i] = "# HELP received Number of received samples\nhomekit_received{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(receivedPackets[i]);
+			temp_metrics[i] = "# HELP temp Temperature\nhomekit_temperature{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(temps[i]);
+			hum_metrics[i]  = "# HELP hum Relative Humidity\nhomekit_humidity{device=\"rf_bridge\",channel=\"" + String(i + 1) + "\",location=\"home\"} " + String(hums[i]);
 
 			LOG1(temp_metrics[i]);
 			LOG1("\n");
 			LOG1(hum_metrics[i]);
 			LOG1("\n");
-			LOG1(received_metrics[i]);
-			LOG1("\n");
 		}
 
 		if (sensors == 1) {
-			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0] + "\n" + received_metrics[0]);
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0]);
 		} else if (sensors == 2) {
-			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0] + "\n" + received_metrics[0] + "\n" + temp_metrics[1] + "\n" + hum_metrics[1] + "\n" + received_metrics[1]);
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0] + "\n" + temp_metrics[1] + "\n" + hum_metrics[1] + "\n" + received_metrics[1]);
 		} else if (sensors == 3) {
-			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0] + "\n" + received_metrics[0] + "\n" + temp_metrics[1] + "\n" + hum_metrics[1] + "\n" + received_metrics[1] + "\n" + temp_metrics[2] + "\n" + hum_metrics[2] + "\n" + received_metrics[2]);
+			server.send(200, "text/plain", uptimeMetric + "\n" + heapMetric + "\n" + temp_metrics[0] + "\n" + hum_metrics[0] + "\n" + temp_metrics[1] + "\n" + hum_metrics[1] + "\n" + received_metrics[1] + "\n" + temp_metrics[2] + "\n" + hum_metrics[2] + "\n" + received_metrics[2]);
 		}
 	});
 

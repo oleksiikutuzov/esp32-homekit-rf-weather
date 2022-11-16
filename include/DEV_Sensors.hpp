@@ -1,5 +1,6 @@
 #include <HomeSpan.h>
 #include <rtl_433_ESP.h>
+#include <stdio.h>
 
 #define FAULT_INTERVAL 10 // in minutes
 
@@ -9,6 +10,7 @@ rtl_433_ESP rf(-1); // use -1 to disable transmitter
 CUSTOM_SERV(Settings, 00000001-0001-0001-0001-46637266EA00);
 CUSTOM_CHAR(Selector, 00000002-0001-0001-0001-46637266EA00, PR + PW + EV, UINT8, 1, 1, 3, false); // create Custom Characteristic to "select" special effects via Eve App
 CUSTOM_CHAR(LedsOn, 00000003-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, false);
+CUSTOM_CHAR_STRING(LastReceived, 00000004-0001-0001-0001-46637266EA00, PR + EV, "");
 CUSTOM_CHAR_STRING(IPAddress, 00000005-0001-0001-0001-46637266EA00, PR + EV, "");
 CUSTOM_CHAR(Reboot, 00000006-0001-0001-0001-46637266EA00, PR + PW + EV, BOOL, 0, 0, 1, false);
 // clang-format on
@@ -68,12 +70,18 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 	SpanCharacteristic *hum;     // reference to the Humidity Characteristic
 	SpanCharacteristic *battery; // reference to Low Battery Characteristic
 	SpanCharacteristic *fault;   // reference to Fault Characteristic
+	SpanCharacteristic *last_received;
+	int                 last_received_val = 0;
 
 	DEV_HumiditySensor() : Service::HumiditySensor() { // constructor() method
 
-		hum     = new Characteristic::CurrentRelativeHumidity(0, true);
-		battery = new Characteristic::StatusLowBattery();
-		fault   = new Characteristic::StatusFault(0);
+		hum           = new Characteristic::CurrentRelativeHumidity(0, true);
+		battery       = new Characteristic::StatusLowBattery();
+		fault         = new Characteristic::StatusFault(0);
+		last_received = new Characteristic::LastReceived("0");
+
+		last_received->setDescription("Last received");
+		last_received->setUnit("s");
 
 		LOG0("Configuring Humidity Sensor"); // initialization message
 		LOG0("\n");
@@ -85,6 +93,13 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 		if (hum->timeVal() > FAULT_INTERVAL * 60 * 1000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
 			fault->setVal(1);                                                  // set fault state
 			LOG1("Sensor update: FAULT\n");
+		}
+
+		if (last_received->timeVal() > 10 * 1000) {
+			char buffer[10];
+			sprintf(buffer, "%d", last_received_val);
+			last_received->setString(buffer);
+			last_received_val += 10;
 		}
 
 		rf.loop();
