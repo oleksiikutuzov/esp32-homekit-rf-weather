@@ -1,4 +1,9 @@
 #include <HomeSpan.h>
+#include <rtl_433_ESP.h>
+
+#define FAULT_INTERVAL 10 // in minutes
+
+rtl_433_ESP rf(-1); // use -1 to disable transmitter
 
 // clang-format off
 CUSTOM_SERV(Settings, 00000001-0001-0001-0001-46637266EA00);
@@ -20,11 +25,8 @@ struct DEV_Settings : Service::Settings {
 		num_sensors.setUnit(""); // configures custom "Selector" characteristic for use with Eve HomeKit
 		num_sensors.setDescription("Number of channels");
 		num_sensors.setRange(1, 3, 1);
-
 		leds_on.setDescription("Blink LEDs on receive");
-
 		ip_address.setDescription("IP Address");
-
 		reboot.setDescription("Reboot Device");
 
 		LOG0("Configuring Settings Service"); // initialization message
@@ -69,11 +71,9 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 	DEV_HumiditySensor() : Service::HumiditySensor() { // constructor() method
 
-		hum = new Characteristic::CurrentRelativeHumidity(0, true);
-
+		hum     = new Characteristic::CurrentRelativeHumidity(0, true);
 		battery = new Characteristic::StatusLowBattery();
-
-		fault = new Characteristic::StatusFault(0);
+		fault   = new Characteristic::StatusFault(0);
 
 		LOG0("Configuring Humidity Sensor"); // initialization message
 		LOG0("\n");
@@ -82,9 +82,11 @@ struct DEV_HumiditySensor : Service::HumiditySensor {
 
 	void loop() {
 
-		if (hum->timeVal() > 5 * 60 * 1000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
-			fault->setVal(1);                                     // set fault state
+		if (hum->timeVal() > FAULT_INTERVAL * 60 * 1000 && !fault->getVal()) { // else if it has been a while since last update (120 seconds), and there is no current fault
+			fault->setVal(1);                                                  // set fault state
 			LOG1("Sensor update: FAULT\n");
 		}
+
+		rf.loop();
 	} // loop
 };

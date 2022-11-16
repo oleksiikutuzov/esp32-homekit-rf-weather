@@ -66,8 +66,6 @@ void statusUpdate(HS_STATUS status);
 
 char messageBuffer[JSON_MSG_BUFFER];
 
-rtl_433_ESP rf(-1); // use -1 to disable transmitter
-
 WebServer server(80);
 
 char sNumber[18] = "11:11:11:11:11:11";
@@ -169,7 +167,7 @@ void setup() {
 
 	homeSpan.setControlPin(BUTTON_PIN);                        // Set button pin
 	homeSpan.setStatusPin(LED_STATUS);                         // Set status led pin
-	homeSpan.setLogLevel(0);                                   // set log level
+	homeSpan.setLogLevel(1);                                   // set log level
 	homeSpan.setPortNum(88);                                   // change port number for HomeSpan so we can use port 80 for the Web Server
 	homeSpan.setStatusAutoOff(10);                             // turn off status led after 10 seconds of inactivity
 	homeSpan.setWifiCallback(setupWeb);                        // need to start Web Server after WiFi is established
@@ -232,7 +230,6 @@ void setup() {
 void loop() {
 	homeSpan.poll();
 	server.handleClient();
-	rf.loop();
 }
 
 void setupWeb() {
