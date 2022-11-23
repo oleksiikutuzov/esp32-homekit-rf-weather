@@ -63,6 +63,7 @@ void logJson(JsonObject &jsondata);
 void blinkLed(int pin);
 void setupWeb();
 void statusUpdate(HS_STATUS status);
+void initSensor(int index);
 
 char messageBuffer[JSON_MSG_BUFFER];
 
@@ -153,6 +154,10 @@ void setup() {
 	rf.enableReceiver(RF_MODULE_RECEIVER_GPIO);
 	Log.notice(F("****** setup complete ******" CR));
 
+	for (int i = 0; i < 3; i++) {
+		pinMode(led_pin[i], OUTPUT);
+	}
+
 	Serial.print("Active firmware version: ");
 	Serial.println(FW_VERSION);
 
@@ -183,46 +188,14 @@ void setup() {
 	new Characteristic::Identify();
 	new Characteristic::FirmwareRevision(temp.c_str());
 
-	new SpanAccessory();
-	new Service::AccessoryInformation();
-	new Characteristic::Identify();
-	new Characteristic::Name("RF Weather Bridge Settings");
+	initSensor(0);
 	SETTINGS = new DEV_Settings();
 
 	// get number of channels
 	int sensors = SETTINGS->num_sensors.getVal();
 
-	for (int i = 0; i < 3; i++) {
-		pinMode(led_pin[i], OUTPUT);
-	}
-
-	for (int i = 0; i < sensors; i++) {
-
-		// blink led
-		blinkLed(led_pin[i]);
-
-		String channel_string     = "Channel ";
-		String sensor_name_string = "Temperature and Humidity Sensor CH";
-
-		char *channel_char     = new char[channel_string.length() + 2];
-		char *sensor_name_char = new char[sensor_name_string.length() + 2];
-		char  channel_num[2];
-
-		sprintf(channel_num, "%d", i + 1);
-
-		strcpy(channel_char, channel_string.c_str());
-		strcpy(sensor_name_char, sensor_name_string.c_str());
-
-		strcat(channel_char, channel_num);
-		strcat(sensor_name_char, channel_num);
-
-		new SpanAccessory();
-		new Service::AccessoryInformation();
-		new Characteristic::Identify();
-		new Characteristic::Name(sensor_name_char);
-		new Characteristic::Model(channel_char);
-		TEMP_SENSORS[i] = new DEV_TemperatureSensor();
-		HUM_SENSORS[i]  = new DEV_HumiditySensor();
+	for (int i = 1; i < sensors; i++) {
+		initSensor(i);
 	}
 }
 
@@ -304,4 +277,33 @@ void blinkLed(int pin) {
 // create a callback function that simply prints the pre-defined short messages on the Serial Monitor whenever the HomeSpan status changes
 void statusUpdate(HS_STATUS status) {
 	Serial.printf("\n*** HOMESPAN STATUS CHANGE: %s\n", homeSpan.statusString(status));
+}
+
+void initSensor(int index) {
+
+	// blink led
+	blinkLed(led_pin[index]);
+
+	String channel_string     = "Channel ";
+	String sensor_name_string = "Temperature and Humidity Sensor CH";
+
+	char *channel_char     = new char[channel_string.length() + 2];
+	char *sensor_name_char = new char[sensor_name_string.length() + 2];
+	char  channel_num[2];
+
+	sprintf(channel_num, "%d", index + 1);
+
+	strcpy(channel_char, channel_string.c_str());
+	strcpy(sensor_name_char, sensor_name_string.c_str());
+
+	strcat(channel_char, channel_num);
+	strcat(sensor_name_char, channel_num);
+
+	new SpanAccessory();
+	new Service::AccessoryInformation();
+	new Characteristic::Identify();
+	new Characteristic::Name(sensor_name_char);
+	new Characteristic::Model(channel_char);
+	TEMP_SENSORS[index] = new DEV_TemperatureSensor();
+	HUM_SENSORS[index]  = new DEV_HumiditySensor();
 }
